@@ -1,0 +1,51 @@
+{
+  "name": "sigmapix/sonata-import-bundle",
+  "type": "symfony-bundle",
+  "description": "Symfony SigmapixSonataImportBundle",
+  "keywords": [
+    "import",
+    "sonata",
+    "importer"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Sigmapix",
+      "homepage": "https://sigmapix.com"
+    }
+  ],
+  "require": {
+    "php": "^5.3 || ^7.0",
+    "symfony/console": "^2.3",
+    "symfony/form": "^2.3",
+    "symfony/framework-bundle": "^2.3",
+    "symfony/templating": "^2.3",
+    "sonata-project/admin-bundle": "^3.4",
+    "sonata-project/user-bundle": "^3.0"
+  },
+  "require-dev": {
+    "doctrine/orm": "^2.4",
+    "sonata-project/doctrine-orm-admin-bundle": "^3.0"
+  },
+  "suggest": {
+    "sonata-project/doctrine-orm-admin-bundle": "^2.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Sigmapix\\Sonata\\ImportBundle\\": ""
+    },
+    "exclude-from-classmap": [
+      "Tests/"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Sigmapix\\Sonata\\ImportBundle\\Tests\\": "Tests/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.x-dev"
+    }
+  }
+}
