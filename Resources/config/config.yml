@@ -1,0 +1,3 @@
+parameters:
+    import_directory: '%kernel.root_dir%/../web/imports/'
+    sigmapix.sonata.import.doctrine_writer.class: Port\Doctrine\DoctrineWriter
