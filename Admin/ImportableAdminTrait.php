@@ -147,10 +147,11 @@ trait ImportableAdminTrait
      * @param Request $request
      * @param UploadedFile   $file
      * @param Form $form
+     * @param mixed $results
      *
      * @return Response|null
      */
-    public function postImport(Request $request, UploadedFile $file, Form $form)
+    public function postImport(Request $request, UploadedFile $file, Form $form, $results)
     {
     }
 }

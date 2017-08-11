@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\SubmitButton;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 final class ImportService
 {
@@ -22,8 +23,14 @@ final class ImportService
      */
     protected $em;
 
+    /**
+     * @var SessionInterface
+     */
     private $session;
 
+    /**
+     * @var ContainerInterface
+     */
     private $container;
 
     /**
@@ -31,6 +38,13 @@ final class ImportService
      */
     private $doctrineWriterClass;
 
+    /**
+     * ImportService constructor.
+     * @param EntityManagerInterface $em
+     * @param $session
+     * @param ContainerInterface $container
+     * @param string $doctrineWriterClass
+     */
     public function __construct(EntityManagerInterface $em, $session, ContainerInterface $container, string $doctrineWriterClass)
     {
         $this->em = $em;
@@ -51,6 +65,12 @@ final class ImportService
         return $headers;
     }
 
+    /**
+     * @param UploadedFile $file
+     * @param Form $form
+     *
+     * @return mixed
+     */
     public function import(UploadedFile $file, Form $form)
     {
         $mapping = [];
@@ -94,9 +114,13 @@ final class ImportService
             ->addStep($converterStep)
             ->process();
 
-        return true;
+        return $result;
     }
 
+    /**
+     * @param UploadedFile $file
+     * @return CsvReader|ExcelReader
+     */
     private function getReader(UploadedFile $file)
     {
         $pathFile = $file->getRealPath();

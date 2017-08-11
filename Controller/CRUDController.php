@@ -2,6 +2,7 @@
 
 namespace Sigmapix\Sonata\ImportBundle\Controller;
 
+use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Sigmapix\Sonata\ImportBundle\Admin\ImportableAdminTrait;
 use Sigmapix\Sonata\ImportBundle\Service\ImportService;
 use Sonata\AdminBundle\Controller\CRUDController as Controller;
@@ -157,16 +158,22 @@ class CRUDController extends Controller
                             return $preResponse;
                         }
 
-                        if ($is->import($file, $form)) {
+                        try {
 
-                            $postResponse = $admin->postImport($request, $file, $form);
+                            $results = $is->import($file, $form);
+
+                            $postResponse = $admin->postImport($request, $file, $form, $results);
+
                             if ($postResponse !== null) {
                                 return $postResponse;
                             }
 
-                            $this->addFlash("success", "ok"); // todo: show a success message
-                        } else {
-                            $this->addFlash("error", "ko"); // todo: show an error message
+                            $this->addFlash("success", "L'import à été effectué avec succès."); // todo: show a success message
+
+                        } catch (ConstraintViolationException $constraintViolationException) {
+                            $this->addFlash("error", $constraintViolationException->getMessage()); // todo: show an error message
+                        } catch (\Exception $exception) {
+                            $this->addFlash("error", $exception->getMessage()); // todo: show an error message
                         }
 
                         return $this->redirect($admin->generateUrl('list'));
