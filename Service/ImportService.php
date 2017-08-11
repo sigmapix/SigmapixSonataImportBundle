@@ -106,7 +106,7 @@ final class ImportService
         if (in_array($fileExtension, $excelExtensions)) {
             $reader = new ExcelReader(new \SplFileObject($pathFile), 0, 0);
         } else {
-            $reader = new CsvReader(new \SplFileObject($pathFile), ',');
+            $reader = new CsvReader(new \SplFileObject($pathFile), ';');
             $reader->setHeaderRowNumber(0, CsvReader::DUPLICATE_HEADERS_INCREMENT);
         }
 
