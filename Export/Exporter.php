@@ -8,6 +8,7 @@ use Exporter\Writer\JsonWriter;
 use Exporter\Writer\XlsWriter;
 use Exporter\Writer\XmlWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Sigmapix\Sonata\ImportBundle\Export\Handler;
 
 @trigger_error(
     'The '.__NAMESPACE__.'\Exporter class is deprecated since version 3.1 and will be removed in 4.0.'.
@@ -29,7 +30,7 @@ class Exporter
      *
      * @return StreamedResponse
      */
-    public function getResponse($format, $filename, SourceIteratorInterface $source)
+    public function getResponse($format, $filename, SourceIteratorInterface $source, array $defaultHeaders)
     {
         switch ($format) {
             case 'xls':
@@ -51,9 +52,9 @@ class Exporter
             default:
                 throw new \RuntimeException('Invalid format');
         }
-
-        $callback = function () use ($source, $writer) {
-            $handler = \Exporter\Handler::create($source, $writer);
+        
+        $callback = function () use ($source, $writer, $defaultHeaders) {
+            $handler = Handler::create($source, $writer, $defaultHeaders);
             $handler->export();
         };
 

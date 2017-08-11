@@ -10,9 +10,86 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\Common\Inflector\Inflector;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Sonata\AdminBundle\Admin\AdminInterface;
+use Sonata\AdminBundle\Datagrid\ProxyQueryInterface;
+use Sonata\AdminBundle\Exception\LockException;
+use Sonata\AdminBundle\Exception\ModelManagerException;
+use Sonata\AdminBundle\Util\AdminObjectAclData;
+use Sonata\AdminBundle\Util\AdminObjectAclManipulator;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Csrf\CsrfToken;
 
 class CRUDController extends Controller
 {
+    /**
+     * Export data to specified format.
+     *
+     * @param Request $request
+     *
+     * @return Response
+     *
+     * @throws AccessDeniedException If access is not granted
+     * @throws \RuntimeException     If the export format is invalid
+     */
+    public function exportAction(Request $request)
+    {
+        $this->admin->checkAccess('export');
+
+        $format = $request->get('format');
+
+        // NEXT_MAJOR: remove the check
+        if (!$this->has('sonata.admin.admin_exporter')) {
+            @trigger_error(
+                'Not registering the exporter bundle is deprecated since version 3.14.'
+                .' You must register it to be able to use the export action in 4.0.',
+                E_USER_DEPRECATED
+            );
+            $allowedExportFormats = (array) $this->admin->getExportFormats();
+
+            $class = $this->admin->getClass();
+            $filename = sprintf(
+                'export_%s_%s.%s',
+                strtolower(substr($class, strripos($class, '\\') + 1)),
+                date('Y_m_d_H_i_s', strtotime('now')),
+                $format
+            );
+            $exporter = $this->get('sonata.admin.exporter');
+        } else {
+            $adminExporter = $this->get('sonata.admin.admin_exporter');
+            $allowedExportFormats = $adminExporter->getAvailableFormats($this->admin);
+            $filename = $adminExporter->getExportFilename($this->admin, $format);
+            $exporter = $this->get('sonata.exporter.exporter');
+        }
+
+        if (!in_array($format, $allowedExportFormats)) {
+            throw new \RuntimeException(
+                sprintf(
+                    'Export in format `%s` is not allowed for class: `%s`. Allowed formats are: `%s`',
+                    $format,
+                    $this->admin->getClass(),
+                    implode(', ', $allowedExportFormats)
+                )
+            );
+        }
+
+        $defaultHeaders = array_map(function(){return "";},$this->admin->getExportFields());
+        return $exporter->getResponse(
+            $format,
+            $filename,
+            $this->admin->getDataSourceIterator(),
+            $defaultHeaders
+        );
+    }
 
     public function uploadAction(Request $request)
     {
