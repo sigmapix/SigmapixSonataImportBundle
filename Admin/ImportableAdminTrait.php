@@ -6,6 +6,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
+use Symfony\Bundle\FrameworkBundle\Translation\Translator;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +14,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\DataCollectorTranslator;
 
 trait ImportableAdminTrait
 {
@@ -102,7 +102,7 @@ trait ImportableAdminTrait
         return $this->importForm;
     }
 
-    private function nearest($input, $words, DataCollectorTranslator $trans)
+    private function nearest($input, $words, Translator $trans)
     {
         // TODO $input should be the $field, to try both 'name' and 'propertyPath' attributes
         $closest = "";
