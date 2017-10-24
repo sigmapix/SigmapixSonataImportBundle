@@ -66,6 +66,8 @@ trait ImportableAdminTrait
         $this->configureImportFields($mapper);
         $trans = $this->getConfigurationPool()->getContainer()->get('translator');
 
+        $oldValue = ini_get('mbstring.substitute_character');
+        ini_set('mbstring.substitute_character', "none");
         foreach ($formBuilder as $field) {
             /* @var FormBuilder $field */
             if ($field->getType()->getInnerType() instanceof EntityType) continue;
@@ -77,6 +79,7 @@ trait ImportableAdminTrait
                 $mapper->add($field->getName(), 'choice', ['choices' => $headers, 'data' => $this->nearest($field->getName(), $headers, $trans)]);
             }
         }
+        ini_set('mbstring.substitute_character', $oldValue);
         $formBuilder->add('import', SubmitType::class);
 
         $this->attachInlineValidator();
@@ -108,6 +111,7 @@ trait ImportableAdminTrait
         $shortest = -1;
 
         foreach ($words as $word) {
+            $word = mb_convert_encoding($word, 'ASCII');
             $lev = levenshtein($input, $word);
             $levCase = levenshtein(strtolower($input), strtolower($word));
             $levTrans = levenshtein($trans->trans($input), $word);
