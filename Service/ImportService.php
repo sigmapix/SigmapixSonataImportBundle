@@ -60,7 +60,8 @@ final class ImportService
     public function getHeaders(UploadedFile $file)
     {
         $reader = $this->getReader($file);
-        $headers = array_flip($reader->getColumnHeaders());
+        $columnHeaders = array_filter($reader->getColumnHeaders(),function($h){return !is_null($h);} );
+        $headers = array_flip($columnHeaders);
         array_walk($headers, function(&$v, $k) use ($headers) { $v = $k; });
         return $headers;
     }
