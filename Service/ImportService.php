@@ -61,6 +61,7 @@ final class ImportService
     {
         $reader = $this->getReader($file);
         $columnHeaders = array_filter($reader->getColumnHeaders(),function($h){return !is_null($h);} );
+        $columnHeaders = array_map(function($h){return trim($h);}, $columnHeaders);
         $headers = array_flip($columnHeaders);
         array_walk($headers, function(&$v, $k) use ($headers) { $v = $k; });
         return $headers;
