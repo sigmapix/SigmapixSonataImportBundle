@@ -111,10 +111,10 @@ trait ImportableAdminTrait
         $shortest = -1;
 
         foreach ($words as $word) {
-            $word = mb_convert_encoding($word, 'ASCII');
-            $lev = levenshtein($input, $word);
-            $levCase = levenshtein(strtolower($input), strtolower($word));
-            $levTrans = levenshtein($trans->trans($input), $word);
+            $wordASCII = mb_convert_encoding($word, 'ASCII');
+            $lev = levenshtein($input, $wordASCII);
+            $levCase = levenshtein(strtolower($input), strtolower($wordASCII));
+            $levTrans = levenshtein($trans->trans($input), $wordASCII);
             $lev = min([$lev, $levCase, $levTrans]);
             if ($lev === 0) {
                 $closest = $word;
