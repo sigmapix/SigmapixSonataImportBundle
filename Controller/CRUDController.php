@@ -160,7 +160,7 @@ class CRUDController extends Controller
 
                         try {
 
-                            $results = $is->import($file, $form);
+                            $results = $is->import($file, $form, $admin); 
 
                             $postResponse = $admin->postImport($request, $file, $form, $results);
 
@@ -168,7 +168,7 @@ class CRUDController extends Controller
                                 return $postResponse;
                             }
 
-                            $this->addFlash("success", "L'import à été effectué avec succès."); // todo: show a success message
+                            $this->addFlash("success", "message_success"); // todo: show a success message
 
                         } catch (ConstraintViolationException $constraintViolationException) {
                             $this->addFlash("error", $constraintViolationException->getMessage()); // todo: show an error message
