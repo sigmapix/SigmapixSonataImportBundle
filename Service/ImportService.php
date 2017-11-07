@@ -10,11 +10,16 @@ use Port\Steps\StepAggregator;
 use Port\ValueConverter\DateTimeValueConverter;
 use Doctrine\ORM\EntityManagerInterface;
 use Sonata\DoctrineORMAdminBundle\Admin\FieldDescription;
+use Sonata\AdminBundle\Admin\AdminInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\SubmitButton;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Port\Steps\Step\ConverterStep;
+use AppBundle\Entity\Residence;
+use AppBundle\Entity\Family;
+use AppBUndle\Entity\Building;
 
 final class ImportService
 {
@@ -70,20 +75,14 @@ final class ImportService
     /**
      * @param UploadedFile $file
      * @param Form $form
-     *
+     * @param AdminInterface $admin
      * @return mixed
      */
-    public function import(UploadedFile $file, Form $form)
+    public function import(UploadedFile $file, Form $form, AdminInterface $admin)
     {
+        
         $mapping = [];
-        $dateTimeFields = [];
         foreach ($form as $f) {
-            /** @var Form $f */
-            /** @var FieldDescription $fieldOptions */
-            $fieldOptions = $f->getConfig()->getOption('sonata_field_description');
-            if ($fieldOptions && $fieldOptions->getMappingType() === 'datetime') {
-                $dateTimeFields[] = $f->getName();
-            }
             if ($f instanceof SubmitButton) continue;
             $mapping[$f->getName()] = $f->getNormData();
         }
@@ -103,19 +102,12 @@ final class ImportService
             $writer->setContainer($this->container);
         }
         $writer->disableTruncate();
-
-        $converter = new DateTimeValueConverter('d/m/Y');
-        $converterStep = new ValueConverterStep();
-        foreach ($dateTimeFields as $dateTimeField) {
-            $converterStep->add('['.$dateTimeField.']', $converter);
-        }
-
+        
         $workflow = new StepAggregator($reader);
-        $result = $workflow
-            ->addWriter($writer)
-            ->addStep($converterStep)
-            ->process();
-
+        $workflow->addWriter($writer);         
+        $admin->configureImportSteps($workflow);   
+        
+        $result = $workflow->process();
         return $result;
     }
 

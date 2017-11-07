@@ -13,6 +13,9 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Port\Steps\StepAggregator;
+use Port\Steps\Step\ValueConverterStep;
+use Port\ValueConverter\DateTimeValueConverter;
 
 trait ImportableAdminTrait
 {
@@ -72,11 +75,26 @@ trait ImportableAdminTrait
             /* @var FormBuilder $field */
             if ($field->getType()->getInnerType() instanceof EntityType) continue;
             if ($field->getPropertyPath() && $field->getPropertyPath()->getLength() > 1) {
-                $mapper->add((string)$field->getPropertyPath(), 'choice', ['choices' => $headers, 'data' => $this->nearest($field->getName(), $headers, $trans), 'mapped' => false]);
+                $mapper->add(
+                    (string)$field->getPropertyPath(), 'choice', array(
+                    'choices' => $headers, 
+                    'data' => $this->nearest($field->getOption("label"), $headers, $trans), 
+                    'mapped' => false,
+                    'label' => $field->getOption("label")
+                ));
             } else if ((string)$field->getPropertyPath() === 'id') {
-                $mapper->add($field->getName(), 'choice', ['choices' => $headers, 'data' => $this->nearest($field->getName(), $headers, $trans), 'mapped' => false]);
+                $mapper->add($field->getName(), 'choice', array(
+                    'choices' => $headers, 
+                    'data' => $this->nearest($field->getOption("label"), $headers, $trans),
+                    'mapped' => false,
+                    'label' => $field->getOption("label")
+                ));
             } else {
-                $mapper->add($field->getName(), 'choice', ['choices' => $headers, 'data' => $this->nearest($field->getName(), $headers, $trans)]);
+                $mapper->add($field->getName(), 'choice', array(
+                    'choices' => $headers, 
+                    'data' => $this->nearest($field->getOption("label"), $headers, $trans),                    
+                    'label' => $field->getOption("label")
+                ));
             }
         }
         ini_set('mbstring.substitute_character', $oldValue);
@@ -128,6 +146,28 @@ trait ImportableAdminTrait
         }
 
         return $closest;
+    }
+
+    public function configureImportSteps(StepAggregator $workflow)
+    {   
+        $dateTimeFields = [];
+        foreach ($this->importForm as $f) {
+            
+            /** @var Form $f */
+            /** @var FieldDescription $fieldOptions */
+            $fieldOptions = $f->getConfig()->getOption('sonata_field_description');            
+            if ($fieldOptions && ($fieldOptions->getMappingType() === 'datetime'|| $fieldOptions->getMappingType() === 'date')) {
+                $dateTimeFields[] = $f->getName();
+            }           
+        }    
+        $converter = new DateTimeValueConverter('d/m/Y');
+        $converterStep = new ValueConverterStep();
+        foreach ($dateTimeFields as $dateTimeField) {
+            $converterStep->add('['.$dateTimeField.']', $converter);
+        }
+
+        $workflow->addStep($converterStep);
+        
     }
 
     /**
