@@ -92,7 +92,7 @@ final class ImportService
 
         // Replace columnsHeader names with entity field name in our $mapping
         $columnHeaders = array_map(function($h) use ($mapping) {
-            $k = array_search($h, (array) $mapping, true);
+            $k = array_search(trim($h), (array) $mapping, true);
             return ($k === false ? $h : $k);
         }, $reader->getColumnHeaders());
         $reader->setColumnHeaders($columnHeaders);
