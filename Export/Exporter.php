@@ -8,7 +8,6 @@ use Exporter\Writer\JsonWriter;
 use Exporter\Writer\XlsWriter;
 use Exporter\Writer\XmlWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Sigmapix\Sonata\ImportBundle\Export\Handler;
 
 @trigger_error(
     'The '.__NAMESPACE__.'\Exporter class is deprecated since version 3.1 and will be removed in 4.0.'.
@@ -22,11 +21,11 @@ use Sigmapix\Sonata\ImportBundle\Export\Handler;
 class Exporter
 {
     /**
-     * @throws \RuntimeException
-     *
      * @param string                  $format
      * @param string                  $filename
      * @param SourceIteratorInterface $source
+     *
+     * @throws \RuntimeException
      *
      * @return StreamedResponse
      */
@@ -52,15 +51,15 @@ class Exporter
             default:
                 throw new \RuntimeException('Invalid format');
         }
-        
+
         $callback = function () use ($source, $writer) {
             $handler = Handler::create($source, $writer);
             $handler->export();
         };
 
-        return new StreamedResponse($callback, 200, array(
+        return new StreamedResponse($callback, 200, [
             'Content-Type' => $contentType,
             'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
-        ));
+        ]);
     }
 }

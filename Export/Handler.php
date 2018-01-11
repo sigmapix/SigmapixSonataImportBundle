@@ -2,7 +2,6 @@
 
 namespace Sigmapix\Sonata\ImportBundle\Export;
 
-use Exporter\Source\DoctrineORMQuerySourceIterator;
 use Exporter\Source\SourceIteratorInterface;
 use Exporter\Writer\WriterInterface;
 

@@ -11,24 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
-use Doctrine\Common\Inflector\Inflector;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use Sonata\AdminBundle\Admin\AdminInterface;
-use Sonata\AdminBundle\Datagrid\ProxyQueryInterface;
-use Sonata\AdminBundle\Exception\LockException;
-use Sonata\AdminBundle\Exception\ModelManagerException;
-use Sonata\AdminBundle\Util\AdminObjectAclData;
-use Sonata\AdminBundle\Util\AdminObjectAclManipulator;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\Security\Csrf\CsrfToken;
 
 class CRUDController extends Controller
 {
@@ -37,10 +21,10 @@ class CRUDController extends Controller
      *
      * @param Request $request
      *
-     * @return Response
-     *
      * @throws AccessDeniedException If access is not granted
      * @throws \RuntimeException     If the export format is invalid
+     *
+     * @return Response
      */
     public function exportAction(Request $request)
     {
@@ -83,7 +67,8 @@ class CRUDController extends Controller
             );
         }
 
-        $defaultHeaders = array_map(function(){return "";},$this->admin->getExportFields());
+        $defaultHeaders = array_map(function () {return ''; }, $this->admin->getExportFields());
+
         return $exporter->getResponse(
             $format,
             $filename,
@@ -98,7 +83,7 @@ class CRUDController extends Controller
         $admin = $this->admin;
 
         // todo: $admin->checkAccess('import');
-        $admin->setFormTabs(array('default'=>array('groups' => array())));
+        $admin->setFormTabs(['default' => ['groups' => []]]);
         $formBuilder = $this->createFormBuilder();
         $formBuilder
             ->add('importFile', FileType::class)
@@ -116,17 +101,18 @@ class CRUDController extends Controller
                     $fileName = md5(uniqid());
 
                     $file->move($this->getParameter('import_directory'), $fileName);
-                    return $this->redirect($admin->generateUrl('import', array('fileName' => $fileName)));
+
+                    return $this->redirect($admin->generateUrl('import', ['fileName' => $fileName]));
                 }
             }
             // todo: show an error message if the form failed validation
         }
 
-        return $this->render('SigmapixSonataImportBundle:CRUD:base_import_form.html.twig', array(
+        return $this->render('SigmapixSonataImportBundle:CRUD:base_import_form.html.twig', [
             'action' => 'upload',
             'form' => $form->createView(),
-            'object' => null
-        ), null);
+            'object' => null,
+        ], null);
     }
 
     public function importAction(Request $request)
@@ -142,7 +128,7 @@ class CRUDController extends Controller
         $fileName = $request->get('fileName');
         if (!empty($fileName)) {
             try {
-                $file = new UploadedFile($this->getParameter('import_directory') . $fileName, $fileName);
+                $file = new UploadedFile($this->getParameter('import_directory').$fileName, $fileName);
 
                 $headers = $is->getHeaders($file);
 
@@ -152,28 +138,25 @@ class CRUDController extends Controller
 
                 if ($form->isSubmitted()) {
                     if ($form->isValid()) {
-
                         $preResponse = $admin->preImport($request, $form);
-                        if ($preResponse !== null) {
+                        if (null !== $preResponse) {
                             return $preResponse;
                         }
 
                         try {
-
-                            $results = $is->import($file, $form, $admin); 
+                            $results = $is->import($file, $form, $admin);
 
                             $postResponse = $admin->postImport($request, $file, $form, $results);
 
-                            if ($postResponse !== null) {
+                            if (null !== $postResponse) {
                                 return $postResponse;
                             }
 
-                            $this->addFlash("success", "message_success");
-
+                            $this->addFlash('success', 'message_success');
                         } catch (ConstraintViolationException $constraintViolationException) {
-                            $this->addFlash("error", $constraintViolationException->getMessage());
+                            $this->addFlash('error', $constraintViolationException->getMessage());
                         } catch (\Exception $exception) {
-                            $this->addFlash("error", $exception->getMessage());
+                            $this->addFlash('error', $exception->getMessage());
                         }
 
                         return $this->redirect($admin->generateUrl('list'));
@@ -183,14 +166,13 @@ class CRUDController extends Controller
             } catch (FileException $e) {
                 // TODO: show an error message if the file is missing
             }
-        } else {
-            // todo: show an error message if the fileName is missing
         }
+        // todo: show an error message if the fileName is missing
 
-        return $this->render('SigmapixSonataImportBundle:CRUD:base_import_form.html.twig', array(
+        return $this->render('SigmapixSonataImportBundle:CRUD:base_import_form.html.twig', [
             'action' => 'import',
             'form' => $form->createView(),
-            'object' => null
-        ), null);
+            'object' => null,
+        ], null);
     }
 }
