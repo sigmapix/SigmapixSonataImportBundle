@@ -168,12 +168,12 @@ class CRUDController extends Controller
                                 return $postResponse;
                             }
 
-                            $this->addFlash("success", "message_success"); // todo: show a success message
+                            $this->addFlash("success", "message_success");
 
                         } catch (ConstraintViolationException $constraintViolationException) {
-                            $this->addFlash("error", $constraintViolationException->getMessage()); // todo: show an error message
+                            $this->addFlash("error", $constraintViolationException->getMessage());
                         } catch (\Exception $exception) {
-                            $this->addFlash("error", $exception->getMessage()); // todo: show an error message
+                            $this->addFlash("error", $exception->getMessage());
                         }
 
                         return $this->redirect($admin->generateUrl('list'));
