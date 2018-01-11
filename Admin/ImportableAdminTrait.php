@@ -12,6 +12,7 @@ use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\DoctrineORMAdminBundle\Admin\FieldDescription;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilder;
@@ -82,21 +83,21 @@ trait ImportableAdminTrait
             }
             if ($field->getPropertyPath() && $field->getPropertyPath()->getLength() > 1) {
                 $mapper->add(
-                    (string) $field->getPropertyPath(), 'choice', [
+                    (string) $field->getPropertyPath(), ChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'mapped' => false,
                     'label' => $field->getOption('label'),
                 ]);
             } elseif ('id' === (string) $field->getPropertyPath()) {
-                $mapper->add($field->getName(), 'choice', [
+                $mapper->add($field->getName(), ChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'mapped' => false,
                     'label' => $field->getOption('label'),
                 ]);
             } else {
-                $mapper->add($field->getName(), 'choice', [
+                $mapper->add($field->getName(), ChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'label' => $field->getOption('label'),
