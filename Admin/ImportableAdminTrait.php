@@ -52,7 +52,6 @@ trait ImportableAdminTrait
 
     protected function buildImportForm(array $headers)
     {
-        /* @var AbstractAdmin $this */
         if ($this->importForm) {
             return;
         }
