@@ -6,8 +6,11 @@ use Port\Steps\Step\ValueConverterStep;
 use Port\Steps\StepAggregator;
 use Port\ValueConverter\DateTimeValueConverter;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Admin\Pool;
+use Sonata\AdminBundle\Builder\FormContractorInterface;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
+use Sonata\DoctrineORMAdminBundle\Admin\FieldDescription;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Form;
@@ -25,11 +28,42 @@ trait ImportableAdminTrait
     private $importForm;
 
     /**
+     * Options to set to the form (ie, validation_groups).
+     *
+     * @var array
+     */
+    protected $formOptions = array();
+
+    /**
+     * @param FormMapper $formMapper
+     */
+    abstract protected function configureImportFields(FormMapper $formMapper);
+
+    /**
+     * Attach the inline validator to the model metadata, this must be done once per admin.
+     */
+    abstract protected function attachInlineValidator();
+
+    /**
+     * {@inheritdoc}
+     */
+    abstract public function getClass();
+
+    /**
+     * @return Pool
+     */
+    abstract public function getConfigurationPool();
+
+    /**
+     * @return FormContractorInterface
+     */
+    abstract public function getFormContractor();
+
+    /**
      * {@inheritdoc}
      */
     public function getImportFormBuilder(array $headers)
     {
-        /* @var AbstractAdmin $this */
         $this->formOptions['data_class'] = $this->getClass();
 
         $formBuilder = $this->getFormContractor()->getFormBuilder(
@@ -45,7 +79,7 @@ trait ImportableAdminTrait
 
     public function defineImportFormBuilder(FormBuilderInterface $formBuilder, array $headers)
     {
-        /* @var AbstractAdmin $this */
+        /** @var AbstractAdmin $this */
         $mapper = new FormMapper($this->getFormContractor(), $formBuilder, $this);
         $this->configureImportFields($mapper);
         $trans = $this->getConfigurationPool()->getContainer()->get('translator');
@@ -99,7 +133,6 @@ trait ImportableAdminTrait
 
     public function getImportForm(array $headers)
     {
-        /* @var AbstractAdmin $this */
         $this->buildImportForm($headers);
 
         return $this->importForm;
