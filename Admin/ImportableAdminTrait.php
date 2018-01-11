@@ -23,26 +23,15 @@ use Symfony\Component\HttpFoundation\Response;
 trait ImportableAdminTrait
 {
     /**
-     * @var Form
-     */
-    private $importForm;
-
-    /**
      * Options to set to the form (ie, validation_groups).
      *
      * @var array
      */
-    protected $formOptions = array();
-
+    protected $formOptions = [];
     /**
-     * @param FormMapper $formMapper
+     * @var Form
      */
-    abstract protected function configureImportFields(FormMapper $formMapper);
-
-    /**
-     * Attach the inline validator to the model metadata, this must be done once per admin.
-     */
-    abstract protected function attachInlineValidator();
+    private $importForm;
 
     /**
      * {@inheritdoc}
@@ -186,6 +175,16 @@ trait ImportableAdminTrait
     public function postImport(Request $request, UploadedFile $file, Form $form, $results)
     {
     }
+
+    /**
+     * @param FormMapper $formMapper
+     */
+    abstract protected function configureImportFields(FormMapper $formMapper);
+
+    /**
+     * Attach the inline validator to the model metadata, this must be done once per admin.
+     */
+    abstract protected function attachInlineValidator();
 
     protected function configureRoutes(RouteCollection $collection)
     {
