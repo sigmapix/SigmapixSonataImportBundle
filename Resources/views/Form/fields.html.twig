@@ -1,0 +1,13 @@
+{% block import_field_choice_row -%}
+    {% set force_error = true %}
+    <div class="form-group{% if (not compound or force_error|default(false)) and not valid %} has-error{% endif %}">
+        {{- form_label(form) -}}
+        <div class="checkbox-inline">
+            <label>
+                <input type="checkbox" class="skip-import-field-checkbox" value="skip" /> {{ 'label_skip_import_field'|trans({}, translation_domain) -}}
+            </label>
+        </div>
+        {{- form_widget(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock import_field_choice_row %}

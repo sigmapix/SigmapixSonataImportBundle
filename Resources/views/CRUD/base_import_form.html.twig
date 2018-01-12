@@ -3,4 +3,23 @@
 {% block form %}
     {% form_theme form 'bootstrap_3_layout.html.twig' %}
     {{ form(form) }}
+    <script type="application/javascript">
+        $(function() {
+            if ($('.skip-import-field-checkbox').length) {
+                $('.skip-import-field-checkbox').on('ifChecked', function(event){
+                    $formGroup = $(this).closest('.form-group');
+                    $formGroup.find('select').select2('disable');
+                });
+                $('.skip-import-field-checkbox').on('ifUnchecked', function(event){
+                    $formGroup = $(this).closest('.form-group');
+                    $formGroup.find('select').select2('enable');
+                });
+            }
+        });
+    </script>
+    <style type="text/css">
+        .select2-container-disabled {
+            display: none;
+        }
+    </style>
 {% endblock %}

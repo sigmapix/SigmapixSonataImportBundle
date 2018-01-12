@@ -5,6 +5,7 @@ namespace Sigmapix\Sonata\ImportBundle\Admin;
 use Port\Steps\Step\ValueConverterStep;
 use Port\Steps\StepAggregator;
 use Port\ValueConverter\DateTimeValueConverter;
+use Sigmapix\Sonata\ImportBundle\Form\Type\ImportFieldChoiceType;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Admin\Pool;
 use Sonata\AdminBundle\Builder\FormContractorInterface;
@@ -83,21 +84,21 @@ trait ImportableAdminTrait
             }
             if ($field->getPropertyPath() && $field->getPropertyPath()->getLength() > 1) {
                 $mapper->add(
-                    (string) $field->getPropertyPath(), ChoiceType::class, [
+                    (string) $field->getPropertyPath(), ImportFieldChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'mapped' => false,
                     'label' => $field->getOption('label'),
                 ]);
             } elseif ('id' === (string) $field->getPropertyPath()) {
-                $mapper->add($field->getName(), ChoiceType::class, [
+                $mapper->add($field->getName(), ImportFieldChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'mapped' => false,
                     'label' => $field->getOption('label'),
                 ]);
             } else {
-                $mapper->add($field->getName(), ChoiceType::class, [
+                $mapper->add($field->getName(), ImportFieldChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'label' => $field->getOption('label'),
