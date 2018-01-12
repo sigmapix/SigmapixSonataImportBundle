@@ -8,8 +8,7 @@ use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
- * Class SigmapixSonataImportExtension
- * @package Sigmapix\Sonata\ImportBundle\DependencyInjection
+ * Class SigmapixSonataImportExtension.
  */
 class SigmapixSonataImportExtension extends Extension
 {
