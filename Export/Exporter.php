@@ -29,7 +29,7 @@ class Exporter
      *
      * @return StreamedResponse
      */
-    public function getResponse($format, $filename, SourceIteratorInterface $source)
+    public function getResponse($format, $filename, SourceIteratorInterface $source, array $defaultHeaders)
     {
         switch ($format) {
             case 'xls':
@@ -52,8 +52,8 @@ class Exporter
                 throw new \RuntimeException('Invalid format');
         }
 
-        $callback = function () use ($source, $writer) {
-            $handler = Handler::create($source, $writer);
+        $callback = function () use ($source, $writer, $defaultHeaders) {
+            $handler = Handler::create($source, $writer, $defaultHeaders);
             $handler->export();
         };
 
