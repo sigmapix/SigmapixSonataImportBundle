@@ -132,7 +132,6 @@ trait ImportableAdminTrait
     {
         $dateTimeFields = [];
         foreach ($this->importForm as $f) {
-
             /** @var Form $f */
             /** @var FieldDescription $fieldOptions */
             $fieldOptions = $f->getConfig()->getOption('sonata_field_description');
