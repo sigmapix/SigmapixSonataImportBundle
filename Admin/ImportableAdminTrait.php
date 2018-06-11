@@ -108,6 +108,7 @@ trait ImportableAdminTrait
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'label' => $field->getOption('label'),
+                    'label_format' => $field->getOption('label_format'), // This will be used for DateTimeConverter
                 ]);
             }
         }
@@ -143,12 +144,12 @@ trait ImportableAdminTrait
             /** @var FieldDescription $fieldOptions */
             $fieldOptions = $f->getConfig()->getOption('sonata_field_description');
             if ($fieldOptions && ('datetime' === $fieldOptions->getMappingType() || 'date' === $fieldOptions->getMappingType())) {
-                $dateTimeFields[] = $f->getName();
+                $dateTimeFields[$f->getName()] = $f->getConfig()->getOption('label_format');
             }
         }
-        $converter = new DateTimeValueConverter('d/m/Y');
         $converterStep = new ValueConverterStep();
-        foreach ($dateTimeFields as $dateTimeField) {
+        foreach ($dateTimeFields as $dateTimeField => $dateTimeFormat) {
+            $converter = new DateTimeValueConverter($dateTimeFormat);
             $converterStep->add('['.$dateTimeField.']', $converter);
         }
 
