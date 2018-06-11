@@ -54,7 +54,14 @@ trait ImportableAdminTrait
      */
     public function getImportFormBuilder(array $headers)
     {
-        $this->formOptions['data_class'] = $this->getClass();
+        $class = new \ReflectionClass($this->hasActiveSubClass() ? $this->getActiveSubClass() : $this->getClass());
+        if ($class->isAbstract()) {
+            // If $class is Abstract, then use the first one.
+            // Developers should then instantiate the good class by overriding DoctrineWrite::writeItem()
+            $class = array_values($this->getSubClasses())[0];
+        }
+
+        $this->formOptions['data_class'] = $class;
 
         $formBuilder = $this->getFormContractor()->getFormBuilder(
             'import_form', $this->formOptions
