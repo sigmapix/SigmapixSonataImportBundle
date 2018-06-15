@@ -107,6 +107,7 @@ trait ImportableAdminTrait
                 $mapper->add($field->getName(), ImportFieldChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
+                    'mapped' => $field->getOption('mapped'),
                     'label' => $field->getOption('label'),
                     'label_format' => $field->getOption('label_format'), // This will be used for DateTimeConverter
                 ]);
