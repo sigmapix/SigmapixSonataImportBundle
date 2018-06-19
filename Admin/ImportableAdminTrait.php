@@ -144,7 +144,7 @@ trait ImportableAdminTrait
             /** @var Form $f */
             /** @var FieldDescription $fieldOptions */
             $fieldOptions = $f->getConfig()->getOption('sonata_field_description');
-            if ($fieldOptions && ('datetime' === $fieldOptions->getMappingType() || 'date' === $fieldOptions->getMappingType())) {
+            if ($fieldOptions && ('datetime' === $fieldOptions->getMappingType() || 'date' === $fieldOptions->getMappingType() || $f->getConfig()->getOption('label_format'))) {
                 $dateTimeFields[$f->getName()] = $f->getConfig()->getOption('label_format');
             }
         }
