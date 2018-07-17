@@ -51,6 +51,7 @@ trait ImportableAdminTrait
 
     /**
      * {@inheritdoc}
+     *
      * @throws \ReflectionException
      */
     public function getImportFormBuilder(array $headers)
