@@ -137,31 +137,28 @@ class CRUDController extends Controller
                 $form->handleRequest($request);
 
                 if ($form->isSubmitted()) {
-                    if ($form->isValid()) {
-                        $preResponse = $admin->preImport($request, $form);
-                        if (null !== $preResponse) {
-                            return $preResponse;
-                        }
-
-                        try {
-                            $results = $is->import($file, $form, $admin);
-
-                            $postResponse = $admin->postImport($request, $file, $form, $results);
-
-                            if (null !== $postResponse) {
-                                return $postResponse;
-                            }
-
-                            $this->addFlash('success', 'message_success');
-                        } catch (ConstraintViolationException $constraintViolationException) {
-                            $this->addFlash('error', $constraintViolationException->getMessage());
-                        } catch (\Exception $exception) {
-                            $this->addFlash('error', $exception->getMessage());
-                        }
-
-                        return $this->redirect($admin->generateUrl('list'));
+                    $preResponse = $admin->preImport($request, $form);
+                    if (null !== $preResponse) {
+                        return $preResponse;
                     }
-                    // todo: show an error message if the form failed validation
+
+                    try {
+                        $results = $is->import($file, $form, $admin);
+
+                        $postResponse = $admin->postImport($request, $file, $form, $results);
+
+                        if (null !== $postResponse) {
+                            return $postResponse;
+                        }
+
+                        $this->addFlash('success', 'message_success');
+                    } catch (ConstraintViolationException $constraintViolationException) {
+                        $this->addFlash('error', $constraintViolationException->getMessage());
+                    } catch (\Exception $exception) {
+                        $this->addFlash('error', $exception->getMessage());
+                    }
+
+                    return $this->redirect($admin->generateUrl('list'));
                 }
             } catch (FileException $e) {
                 // TODO: show an error message if the file is missing
