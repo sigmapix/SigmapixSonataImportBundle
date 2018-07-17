@@ -51,11 +51,12 @@ trait ImportableAdminTrait
 
     /**
      * {@inheritdoc}
+     * @throws \ReflectionException
      */
     public function getImportFormBuilder(array $headers)
     {
-        $class = new \ReflectionClass($this->hasActiveSubClass() ? $this->getActiveSubClass() : $this->getClass());
-        if ($class->isAbstract()) {
+        $class = $this->hasActiveSubClass() ? $this->getActiveSubClass() : $this->getClass();
+        if ((new \ReflectionClass($class))->isAbstract()) {
             // If $class is Abstract, then use the first one.
             // Developers should then instantiate the good class by overriding DoctrineWrite::writeItem()
             $class = array_values($this->getSubClasses())[0];
