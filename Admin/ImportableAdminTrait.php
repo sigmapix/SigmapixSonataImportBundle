@@ -20,6 +20,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Translation\DataCollectorTranslator;
 
 trait ImportableAdminTrait
 {
@@ -108,10 +109,11 @@ trait ImportableAdminTrait
             } else {
                 $mapper->add($field->getName(), ImportFieldChoiceType::class, [
                     'choices' => $headers,
-                    'data' => $this->nearest($field->getOption('label'), $headers, $trans),
+                    'data' => $this->nearest($field->getOption('label'), $headers, $trans, $field->getOption('translation_domain')),
                     'mapped' => $field->getOption('mapped'),
                     'label' => $field->getOption('label'),
                     'label_format' => $field->getOption('label_format'), // This will be used for DateTimeConverter
+                    'translation_domain' => $field->getOption('translation_domain')
                 ]);
             }
         }
@@ -215,7 +217,7 @@ trait ImportableAdminTrait
         $this->importForm = $this->getImportFormBuilder($headers)->getForm();
     }
 
-    private function nearest($input, $words, $trans)
+    private function nearest($input, $words, DataCollectorTranslator $trans, $domain = 'messages')
     {
         // TODO $input should be the $field, to try both 'name' and 'propertyPath' attributes
         $closest = '';
@@ -225,7 +227,7 @@ trait ImportableAdminTrait
             $wordASCII = mb_convert_encoding($word, 'ASCII');
             $lev = levenshtein($input, $wordASCII);
             $levCase = levenshtein(strtolower($input), strtolower($wordASCII));
-            $levTrans = levenshtein($trans->trans($input), $wordASCII);
+            $levTrans = levenshtein($trans->trans($input, [], $domain), $wordASCII);
             $lev = min([$lev, $levCase, $levTrans]);
             if (0 === $lev) {
                 $closest = $word;
