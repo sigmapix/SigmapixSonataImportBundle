@@ -15,6 +15,12 @@
                     $formGroup.find('select').select2('enable');
                 });
             }
+            if ($('form input').length === 1 && $('#import_form_import').length > 0) {
+                $btn = $('#import_form_import');
+                $btn.hide();
+                $btn.closest('.form-group').append(document.createTextNode('{{ 'message_import_auto_wait'|trans({}, 'SonataCoreBundle') }}'));
+                setTimeout(function() {$btn.trigger('click')}, 1500);
+            }
         });
     </script>
     <style type="text/css">
