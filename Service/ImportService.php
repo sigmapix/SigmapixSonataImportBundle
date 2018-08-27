@@ -61,10 +61,15 @@ final class ImportService
     {
         $reader = $this->getReader($file);
         $columnHeaders = array_filter($reader->getColumnHeaders(), function ($h) {return null !== $h; });
-        $columnHeaders = array_map(function ($h) {return trim($h); }, $columnHeaders);
+        $columnHeaders = array_map(
+            function ($h) {
+                if (!empty($h) && is_string($h)) {
+                    $h = utf8_encode($h);
+                }
+                return trim($h);
+            }, $columnHeaders);
         $headers = array_flip($columnHeaders);
         array_walk($headers, function (&$v, $k) use ($headers) { $v = $k; });
-
         return $headers;
     }
 
@@ -87,12 +92,19 @@ final class ImportService
 
         $reader = $this->getReader($file);
 
+        // Convert
+        $columnHeaders = array_map(
+            function ($h) {
+                if (!empty($h) && is_string($h)) {
+                    $h = utf8_encode($h);
+                }
+                return trim($h);
+            }, $reader->getColumnHeaders());
         // Replace columnsHeader names with entity field name in our $mapping
         $columnHeaders = array_map(function ($h) use ($mapping) {
-            $k = array_search(trim($h), (array) $mapping, true);
-
+            $k = array_search($h, (array) $mapping, true);
             return false === $k ? $h : $k;
-        }, $reader->getColumnHeaders());
+        }, $columnHeaders);
         $reader->setColumnHeaders($columnHeaders);
 
         /** @var DoctrineWriter $writer */
