@@ -113,7 +113,7 @@ trait ImportableAdminTrait
                     'mapped' => $field->getOption('mapped'),
                     'label' => $field->getOption('label'),
                     'label_format' => $field->getOption('label_format'), // This will be used for DateTimeConverter
-                    'translation_domain' => $field->getOption('translation_domain')
+                    'translation_domain' => $field->getOption('translation_domain'),
                 ]);
             }
         }
