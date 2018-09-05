@@ -60,17 +60,22 @@ final class ImportService
     public function getHeaders(UploadedFile $file)
     {
         $reader = $this->getReader($file);
+        $headers = array_flip($this->fixHeadersEncoding($reader));
+        array_walk($headers, function (&$v, $k) use ($headers) { $v = $k; });
+        return $headers;
+    }
+
+    private function fixHeadersEncoding($reader)
+    {
         $columnHeaders = array_filter($reader->getColumnHeaders(), function ($h) {return null !== $h; });
         $columnHeaders = array_map(
             function ($h) {
-                if (!empty($h) && is_string($h)) {
+                if (!empty($h) && is_string($h) && mb_detect_encoding($h) !== 'UTF-8') {
                     $h = utf8_encode($h);
                 }
                 return trim($h);
             }, $columnHeaders);
-        $headers = array_flip($columnHeaders);
-        array_walk($headers, function (&$v, $k) use ($headers) { $v = $k; });
-        return $headers;
+        return $columnHeaders;
     }
 
     /**
@@ -91,20 +96,11 @@ final class ImportService
         }
 
         $reader = $this->getReader($file);
-
-        // Convert
-        $columnHeaders = array_map(
-            function ($h) {
-                if (!empty($h) && is_string($h)) {
-                    $h = utf8_encode($h);
-                }
-                return trim($h);
-            }, $reader->getColumnHeaders());
         // Replace columnsHeader names with entity field name in our $mapping
         $columnHeaders = array_map(function ($h) use ($mapping) {
             $k = array_search($h, (array) $mapping, true);
             return false === $k ? $h : $k;
-        }, $columnHeaders);
+        }, $this->fixHeadersEncoding($reader));
         $reader->setColumnHeaders($columnHeaders);
 
         /** @var DoctrineWriter $writer */
