@@ -24,8 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\TranslatorInterface;
 
 /**
- * Trait ImportableAdminTrait
- * @package Sigmapix\Sonata\ImportBundle\Admin
+ * Trait ImportableAdminTrait.
  */
 trait ImportableAdminTrait
 {
@@ -82,8 +81,8 @@ trait ImportableAdminTrait
 
     /**
      * @param FormBuilderInterface $formBuilder
-     * @param array $headers
-     * todo: use defineFormBuilder for import Action and upload Action
+     * @param array                $headers
+     *                                          todo: use defineFormBuilder for import Action and upload Action
      */
     public function defineImportFormBuilder(FormBuilderInterface $formBuilder, array $headers)
     {
@@ -108,14 +107,14 @@ trait ImportableAdminTrait
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'mapped' => false,
-                    'label' => $field->getOption('label')
+                    'label' => $field->getOption('label'),
                 ]);
-            } elseif ((string) $propertyPath === 'id') {
+            } elseif ('id' === (string) $propertyPath) {
                 $mapper->add($field->getName(), ImportFieldChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'mapped' => false,
-                    'label' => $field->getOption('label')
+                    'label' => $field->getOption('label'),
                 ]);
             } else {
                 $mapper->add($field->getName(), ImportFieldChoiceType::class, [
@@ -124,7 +123,7 @@ trait ImportableAdminTrait
                     'mapped' => $field->getOption('mapped'),
                     'label' => $field->getOption('label'),
                     'label_format' => $field->getOption('label_format'), // This will be used for DateTimeConverter
-                    'translation_domain' => $field->getOption('translation_domain')
+                    'translation_domain' => $field->getOption('translation_domain'),
                 ]);
             }
         }
@@ -136,25 +135,30 @@ trait ImportableAdminTrait
     /**
      * @param $admin
      * @param null $object
+     *
      * @return mixed
      */
     public function configureActionButtons($admin, $object = null)
     {
         $buttonList = parent::configureActionButtons($admin, $object);
         $buttonList['import'] = [
-            'template' => 'SigmapixSonataImportBundle:Button:import_button.html.twig'
+            'template' => 'SigmapixSonataImportBundle:Button:import_button.html.twig',
         ];
+
         return $buttonList;
     }
 
     /**
      * @param array $headers
-     * @return Form
+     *
      * @throws \ReflectionException
+     *
+     * @return Form
      */
     public function getImportForm(array $headers)
     {
         $this->buildImportForm($headers);
+
         return $this->importForm;
     }
 
@@ -232,6 +236,7 @@ trait ImportableAdminTrait
 
     /**
      * @param array $headers
+     *
      * @throws \ReflectionException
      */
     protected function buildImportForm(array $headers)
@@ -246,7 +251,8 @@ trait ImportableAdminTrait
      * @param $input
      * @param $words
      * @param TranslatorInterface $trans
-     * @param string $domain
+     * @param string              $domain
+     *
      * @return string
      */
     private function nearest($input, $words, TranslatorInterface $trans, $domain = null)
@@ -262,7 +268,7 @@ trait ImportableAdminTrait
             $levCase = levenshtein(strtolower($input), strtolower($wordASCII));
             $levTrans = levenshtein($trans->trans($input, [], $domain), $wordASCII);
             $lev = min([$lev, $levCase, $levTrans]);
-            if ($lev === 0) {
+            if (0 === $lev) {
                 $closest = $word;
                 break;
             }

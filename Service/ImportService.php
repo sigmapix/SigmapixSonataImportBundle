@@ -62,20 +62,8 @@ final class ImportService
         $reader = $this->getReader($file);
         $headers = array_flip($this->fixHeadersEncoding($reader));
         array_walk($headers, function (&$v, $k) use ($headers) { $v = $k; });
-        return $headers;
-    }
 
-    private function fixHeadersEncoding($reader)
-    {
-        $columnHeaders = array_filter($reader->getColumnHeaders(), function ($h) {return null !== $h; });
-        $columnHeaders = array_map(
-            function ($h) {
-                if (!empty($h) && is_string($h) && mb_detect_encoding($h) !== 'UTF-8') {
-                    $h = utf8_encode($h);
-                }
-                return trim($h);
-            }, $columnHeaders);
-        return $columnHeaders;
+        return $headers;
     }
 
     /**
@@ -99,12 +87,13 @@ final class ImportService
         // Replace columnsHeader names with entity field name in our $mapping
         $columnHeaders = array_map(function ($h) use ($mapping) {
             $k = array_search($h, (array) $mapping, true);
+
             return false === $k ? $h : $k;
         }, $this->fixHeadersEncoding($reader));
         $reader->setColumnHeaders($columnHeaders);
 
         /** @var DoctrineWriter $writer */
-        $writer = new $this->doctrineWriterClass($this->em, get_class($form->getData()));
+        $writer = new $this->doctrineWriterClass($this->em, \get_class($form->getData()));
         if (method_exists($writer, 'setContainer')) {
             $writer->setContainer($this->container);
         }
@@ -141,6 +130,21 @@ final class ImportService
         return $this;
     }
 
+    private function fixHeadersEncoding($reader)
+    {
+        $columnHeaders = array_filter($reader->getColumnHeaders(), function ($h) {return null !== $h; });
+        $columnHeaders = array_map(
+            function ($h) {
+                if (!empty($h) && \is_string($h) && 'UTF-8' !== mb_detect_encoding($h)) {
+                    $h = utf8_encode($h);
+                }
+
+                return trim($h);
+            }, $columnHeaders);
+
+        return $columnHeaders;
+    }
+
     /**
      * @param UploadedFile $file
      *
@@ -152,7 +156,7 @@ final class ImportService
         $fileExtension = $file->guessExtension();
         $excelExtensions = ['xls', 'xlsx', 'zip'];
 
-        if (in_array($fileExtension, $excelExtensions)) {
+        if (\in_array($fileExtension, $excelExtensions)) {
             $reader = new ExcelReader(new \SplFileObject($pathFile), 0, 0, true);
         } else {
             $reader = new CsvReader(new \SplFileObject($pathFile), ';');
