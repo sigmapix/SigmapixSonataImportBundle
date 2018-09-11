@@ -56,7 +56,7 @@ class CRUDController extends Controller
             $exporter = $this->get('sonata.exporter.exporter');
         }
 
-        if (!in_array($format, $allowedExportFormats)) {
+        if (!\in_array($format, $allowedExportFormats)) {
             throw new \RuntimeException(
                 sprintf(
                     'Export in format `%s` is not allowed for class: `%s`. Allowed formats are: `%s`',
