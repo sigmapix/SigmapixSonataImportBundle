@@ -13,6 +13,7 @@ use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\DoctrineORMAdminBundle\Admin\FieldDescription;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilder;
@@ -20,8 +21,12 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\DataCollectorTranslator;
+use Symfony\Component\Translation\TranslatorInterface;
 
+/**
+ * Trait ImportableAdminTrait
+ * @package Sigmapix\Sonata\ImportBundle\Admin
+ */
 trait ImportableAdminTrait
 {
     /**
@@ -75,14 +80,19 @@ trait ImportableAdminTrait
         return $formBuilder;
     }
 
-    // todo: use defineFormBuilder for import Action and upload Action
-
+    /**
+     * @param FormBuilderInterface $formBuilder
+     * @param array $headers
+     * todo: use defineFormBuilder for import Action and upload Action
+     */
     public function defineImportFormBuilder(FormBuilderInterface $formBuilder, array $headers)
     {
         /** @var AbstractAdmin $this */
         $mapper = new FormMapper($this->getFormContractor(), $formBuilder, $this);
         $this->configureImportFields($mapper);
-        $trans = $this->getConfigurationPool()->getContainer()->get('translator');
+        /** @var ContainerInterface $container */
+        $container = $this->getConfigurationPool()->getContainer();
+        $trans = $container->get('translator');
 
         $oldValue = ini_get('mbstring.substitute_character');
         ini_set('mbstring.substitute_character', 'none');
@@ -91,20 +101,21 @@ trait ImportableAdminTrait
             if ($field->getType()->getInnerType() instanceof EntityType) {
                 continue;
             }
-            if ($field->getPropertyPath() && $field->getPropertyPath()->getLength() > 1) {
+            $propertyPath = $field->getPropertyPath();
+            if ($propertyPath && $propertyPath->getLength() > 1) {
                 $mapper->add(
-                    (string) $field->getPropertyPath(), ImportFieldChoiceType::class, [
+                    (string) $propertyPath, ImportFieldChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'mapped' => false,
-                    'label' => $field->getOption('label'),
+                    'label' => $field->getOption('label')
                 ]);
-            } elseif ('id' === (string) $field->getPropertyPath()) {
+            } elseif ((string) $propertyPath === 'id') {
                 $mapper->add($field->getName(), ImportFieldChoiceType::class, [
                     'choices' => $headers,
                     'data' => $this->nearest($field->getOption('label'), $headers, $trans),
                     'mapped' => false,
-                    'label' => $field->getOption('label'),
+                    'label' => $field->getOption('label')
                 ]);
             } else {
                 $mapper->add($field->getName(), ImportFieldChoiceType::class, [
@@ -119,28 +130,37 @@ trait ImportableAdminTrait
         }
         ini_set('mbstring.substitute_character', $oldValue);
         $formBuilder->add('import', SubmitType::class);
-
         $this->attachInlineValidator();
     }
 
+    /**
+     * @param $admin
+     * @param null $object
+     * @return mixed
+     */
     public function configureActionButtons($admin, $object = null)
     {
         $buttonList = parent::configureActionButtons($admin, $object);
-
         $buttonList['import'] = [
-            'template' => 'SigmapixSonataImportBundle:Button:import_button.html.twig',
+            'template' => 'SigmapixSonataImportBundle:Button:import_button.html.twig'
         ];
-
         return $buttonList;
     }
 
+    /**
+     * @param array $headers
+     * @return Form
+     * @throws \ReflectionException
+     */
     public function getImportForm(array $headers)
     {
         $this->buildImportForm($headers);
-
         return $this->importForm;
     }
 
+    /**
+     * @param StepAggregator $workflow
+     */
     public function configureImportSteps(StepAggregator $workflow)
     {
         $dateTimeFields = [];
@@ -157,7 +177,6 @@ trait ImportableAdminTrait
             $converter = new DateTimeValueConverter($dateTimeFormat);
             $converterStep->add('['.$dateTimeField.']', $converter);
         }
-
         $workflow->addStep($converterStep);
     }
 
@@ -199,6 +218,9 @@ trait ImportableAdminTrait
      */
     abstract protected function attachInlineValidator();
 
+    /**
+     * @param RouteCollection $collection
+     */
     protected function configureRoutes(RouteCollection $collection)
     {
         /* @var AbstractAdmin $this */
@@ -208,18 +230,29 @@ trait ImportableAdminTrait
         ;
     }
 
+    /**
+     * @param array $headers
+     * @throws \ReflectionException
+     */
     protected function buildImportForm(array $headers)
     {
         if ($this->importForm) {
             return;
         }
-
         $this->importForm = $this->getImportFormBuilder($headers)->getForm();
     }
 
-    private function nearest($input, $words, DataCollectorTranslator $trans, $domain = 'messages')
+    /**
+     * @param $input
+     * @param $words
+     * @param TranslatorInterface $trans
+     * @param string $domain
+     * @return string
+     */
+    private function nearest($input, $words, TranslatorInterface $trans, $domain = null)
     {
         // TODO $input should be the $field, to try both 'name' and 'propertyPath' attributes
+        $domain = $domain ?: 'messages';
         $closest = '';
         $shortest = -1;
 
@@ -229,9 +262,8 @@ trait ImportableAdminTrait
             $levCase = levenshtein(strtolower($input), strtolower($wordASCII));
             $levTrans = levenshtein($trans->trans($input, [], $domain), $wordASCII);
             $lev = min([$lev, $levCase, $levTrans]);
-            if (0 === $lev) {
+            if ($lev === 0) {
                 $closest = $word;
-                $shortest = 0;
                 break;
             }
             if ($lev <= $shortest || $shortest < 0) {
