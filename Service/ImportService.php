@@ -60,7 +60,8 @@ final class ImportService
     public function getHeaders(UploadedFile $file)
     {
         $reader = $this->getReader($file);
-        $headers = array_flip($this->fixHeadersEncoding($reader));
+        $columnHeaders = array_filter($reader->getColumnHeaders(), function ($h) {return null !== $h; });
+        $headers = array_flip($this->fixHeadersEncoding($columnHeaders));
         array_walk($headers, function (&$v, $k) use ($headers) { $v = $k; });
 
         return $headers;
@@ -89,7 +90,7 @@ final class ImportService
             $k = array_search($h, (array) $mapping, true);
 
             return false === $k ? $h : $k;
-        }, $this->fixHeadersEncoding($reader));
+        }, $this->fixHeadersEncoding($reader->getColumnHeaders()));
         $reader->setColumnHeaders($columnHeaders);
 
         /** @var DoctrineWriter $writer */
@@ -130,9 +131,8 @@ final class ImportService
         return $this;
     }
 
-    private function fixHeadersEncoding($reader)
+    private function fixHeadersEncoding($columnHeaders)
     {
-        $columnHeaders = array_filter($reader->getColumnHeaders(), function ($h) {return null !== $h; });
         $columnHeaders = array_map(
             function ($h) {
                 if (!empty($h) && \is_string($h) && 'UTF-8' !== mb_detect_encoding($h)) {
