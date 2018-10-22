@@ -45,7 +45,7 @@ class Exporter
                 $contentType = 'application/json';
                 break;
             case 'csv':
-                $writer = new CsvWriter('php://output', ';', '"', '', true, true);
+                $writer = new CsvWriter('php://output', ';', '"', '\\', true, true);
                 $contentType = 'text/csv';
                 break;
             default:
