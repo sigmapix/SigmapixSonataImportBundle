@@ -171,10 +171,21 @@ final class ImportService
         if (\in_array($fileExtension, $excelExtensions)) {
             $reader = new ExcelReader(new \SplFileObject($pathFile), 0, 0, true);
         } else {
-            $reader = new CsvReader(new \SplFileObject($pathFile), ';');
+            $reader = new CsvReader(new \SplFileObject($pathFile), $this->detectDelimiter(new \SplFileObject($pathFile)));
             $reader->setHeaderRowNumber(0, CsvReader::DUPLICATE_HEADERS_INCREMENT);
         }
 
         return $reader;
+    }
+
+    /**
+     * @param \SplFileObject $file
+     * @return string
+     */
+    private function detectDelimiter(\SplFileObject $file): string
+    {
+        $firstLine = $file->fgets();
+        $delimiter = substr_count($firstLine, ';') > substr_count($firstLine, ',') ? ';' : ',';
+        return $delimiter;
     }
 }
