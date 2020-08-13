@@ -6,13 +6,17 @@ use Doctrine\ORM\EntityManagerInterface;
 use Port\Csv\CsvReader;
 use Port\Doctrine\DoctrineWriter;
 use Port\Excel\ExcelReader;
+use Port\Steps\Step\MappingStep;
 use Port\Steps\StepAggregator;
 use Sonata\AdminBundle\Admin\AdminInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\SubmitButton;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Sigmapix\Sonata\ImportBundle\Step\AddParentStep;
+use Symfony\Component\PropertyAccess\PropertyPath;
 
 final class ImportService
 {
@@ -74,7 +78,7 @@ final class ImportService
      *
      * @return mixed
      */
-    public function import(UploadedFile $file, Form $form, AdminInterface $admin)
+    public function import(UploadedFile $file, Form $form, AdminInterface $admin, Request $request)
     {
         $mapping = [];
         foreach ($form as $f) {
@@ -101,6 +105,14 @@ final class ImportService
         $writer->disableTruncate();
 
         $workflow = new StepAggregator($reader);
+
+        if ($admin->isChild() && $admin->getParentAssociationMapping()) {
+            $parent = $admin->getParent()->getObject($request->get($admin->getParent()->getIdParameter()));
+            $propertyAccessor = $admin->getConfigurationPool()->getPropertyAccessor();
+            $propertyPath = new PropertyPath($admin->getParentAssociationMapping());
+            $workflow->addStep(new AddParentStep($propertyPath, $parent));
+        }
+
         $workflow->addWriter($writer);
         $admin->configureImportSteps($workflow);
 

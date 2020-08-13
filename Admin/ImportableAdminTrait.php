@@ -144,7 +144,6 @@ trait ImportableAdminTrait
         $buttonList['import'] = [
             'template' => 'SigmapixSonataImportBundle:Button:import_button.html.twig',
         ];
-
         return $buttonList;
     }
 

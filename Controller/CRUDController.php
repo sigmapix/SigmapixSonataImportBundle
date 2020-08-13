@@ -143,7 +143,7 @@ class CRUDController extends Controller
                     }
 
                     try {
-                        $results = $is->import($file, $form, $admin);
+                        $results = $is->import($file, $form, $admin, $request);
 
                         $postResponse = $admin->postImport($request, $file, $form, $results);
 
