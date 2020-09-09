@@ -2,8 +2,8 @@
 
 namespace Sigmapix\Sonata\ImportBundle\Export;
 
-use Exporter\Source\SourceIteratorInterface;
-use Exporter\Writer\WriterInterface;
+use Sonata\Exporter\Source\SourceIteratorInterface;
+use Sonata\Exporter\Writer\WriterInterface;
 
 class Handler
 {

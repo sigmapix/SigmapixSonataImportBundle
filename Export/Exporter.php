@@ -2,11 +2,11 @@
 
 namespace Sigmapix\Sonata\ImportBundle\Export;
 
-use Exporter\Source\SourceIteratorInterface;
-use Exporter\Writer\CsvWriter;
-use Exporter\Writer\JsonWriter;
-use Exporter\Writer\XlsWriter;
-use Exporter\Writer\XmlWriter;
+use Sonata\Exporter\Source\SourceIteratorInterface;
+use Sonata\Exporter\Writer\CsvWriter;
+use Sonata\Exporter\Writer\JsonWriter;
+use Sonata\Exporter\Writer\XlsWriter;
+use Sonata\Exporter\Writer\XmlWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 @trigger_error(
